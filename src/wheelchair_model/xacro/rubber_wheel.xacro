@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<robot name="rubber_wheel" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/inertia_calc.xacro"/>
+
+  <xacro:macro name="rubber_wheel" params="name wheel_radius wheel_width wheel_mass">
+
+    <link name="${name}">
+        <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            </geometry>
+            <material name="rubber"/>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+          </geometry>
+            <mass value="${wheel_mass}"/>
+            <xacro:cylinder_inertia m="${wheel_mass}" r="${wheel_radius}" h="${wheel_width}" />
+        </inertial>
+    </link>
+
+    <!-- Rubber surface -->
+
+    <!-- <gazebo reference="${name}">
+			<mu1 value="5.0"/>
+			<mu2 value="0.5"/>
+			<kp value="10000000.0" />
+			<kd value="1.0" />
+			<fdir1 value="1 0 0"/>
+      <turnGravityOff>false</turnGravityOff>
+      <selfCollide>true</selfCollide>
+    </gazebo> -->
+
+    <!-- <gazebo reference="${name}">
+      <gravity>true</gravity>
+      <selfCollide>true</selfCollide>
+      <mu1>0.1</mu1>
+      <mu2>0.1</mu2>
+      <kp>1000000.0</kp>
+      <kd>1.0</kd>
+      <fdir1>1 0 0</fdir1>
+      <maxContacts>1</maxContacts>
+      <minDepth>0.0001</minDepth>
+      <collision name="${name}_collision">
+        <geometry>
+            <sphere>
+            <radius>0.005</radius>
+        </sphere>
+        </geometry>
+        <surface>
+          <friction>
+            <torsional>
+                <coefficient>10</coefficient>
+                <use_patch_radius>false</use_patch_radius>
+                <surface_radius>0.01</surface_radius>
+                <patch_radius>0.01</patch_radius>
+            </torsional>
+          </friction>
+          <contact>
+            <poissons_ratio>0.01</poissons_ratio>
+            <elastic_modulus>1e8</elastic_modulus>
+          </contact>
+        </surface>
+      </collision>
+      <material>Gazebo/Red</material>
+    </gazebo> -->
+
+  </xacro:macro>
+
+</robot>

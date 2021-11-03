@@ -1,0 +1,91 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="xactuator" params="joint_name actuated parent_link child_link type lower upper *axis *origin actuator_params">
+
+    <xacro:property name="act_yaml"             value="${actuator_params}"/>
+    <xacro:property name="actuator_props"       value="${load_yaml(act_yaml)}"/>
+    <xacro:property name="interface"            value="${actuator_props['interface']}"/>
+    <xacro:property name="servo_effort"         value="${actuator_props['servo_effort']}"/>
+    <xacro:property name="servo_velocity"       value="${actuator_props['servo_velocity']}"/>
+    <xacro:property name="servo_update_freq"    value="${actuator_props['servo_update_freq']}"/>
+    <xacro:property name="servo_motion_filter"  value="${actuator_props['servo_motion_filter']}"/>
+    <xacro:property name="servo_reduction"      value="${actuator_props['servo_reduction']}"/>
+    <xacro:property name="servo_torque"         value="${actuator_props['servo_torque']}"/>
+    <xacro:property name="servo_accuracy"       value="${actuator_props['servo_accuracy']}"/>
+    <xacro:property name="servo_fmax"           value="${actuator_props['servo_fmax']}"/>
+    <xacro:property name="servo_fudge"          value="${actuator_props['servo_fudge']}"/>
+
+    <!-- actuator is not installed -->
+    <xacro:unless value="${actuated}">
+      <joint name="${joint_name}" type="fixed">
+        <xacro:insert_block name="origin"/>
+        <parent link="${parent_link}"/>
+        <child link="${child_link}"/>
+      </joint>
+    </xacro:unless>
+
+    <!-- actuator installed -->
+    <xacro:if value="${actuated}">
+
+      <joint name="${joint_name}" type="${type}">
+        <xacro:insert_block name="origin"/>
+        <xacro:insert_block name="axis"/>
+        <parent link="${parent_link}"/>
+        <child link="${child_link}"/>
+        <limit effort="${servo_effort}" velocity="${servo_velocity}" lower="${lower}" upper="${upper}"/>
+      </joint>
+
+      <!-- nowtech interface -->
+      <xacro:if value="${interface == 'nowtech'}">
+
+        <gazebo>
+          <plugin name="${name}_lift_servo" filename="libnowtech_gazebo_ros_simple_servo.so">
+             <update_rate>${servo_update_freq}</update_rate>
+             <actuated_joint>${joint_name}</actuated_joint>
+             <servo_name>${joint_name}_servo</servo_name>
+             <command_topic>${joint_name}_servo</command_topic>
+             <actuator_velocity>${servo_velocity}</actuator_velocity>
+             <actuator_accuracy>${servo_accuracy}</actuator_accuracy>
+             <actuator_fmax>${servo_fmax}</actuator_fmax>
+             <actuator_fudge>${servo_fudge}</actuator_fudge>
+           </plugin>
+        </gazebo>
+
+      </xacro:if>
+
+      <!-- ros_control interface -->
+      <xacro:unless value="${interface == 'nowtech'}">
+
+        <transmission name="${joint_name}_transmission">
+            <type>transmission_interface/SimpleTransmission</type>
+
+            <xacro:if value="${interface == 'ros_position'}">
+              <joint name="${joint_name}">
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+              </joint>
+              <actuator name="${joint_name}_servo">
+                <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
+                <mechanicalReduction>${servo_reduction}</mechanicalReduction>
+                <motorTorqueConstant>${servo_torque}</motorTorqueConstant>
+              </actuator>
+            </xacro:if>
+
+            <xacro:if value="${interface =='ros_effort'}">
+              <joint name="${joint_name}">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+              </joint>
+              <actuator name="${joint_name}_servo">
+                <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+                <mechanicalReduction>${servo_reduction}</mechanicalReduction>
+                <motorTorqueConstant>${servo_torque}</motorTorqueConstant>
+              </actuator>
+            </xacro:if>
+
+        </transmission>
+    </xacro:unless> <!-- ros_control -->
+
+  </xacro:if> <!-- actuated -->
+  </xacro:macro>
+
+</robot>

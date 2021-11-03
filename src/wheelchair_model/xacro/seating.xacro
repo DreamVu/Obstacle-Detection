@@ -1,0 +1,252 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/inertia_calc.xacro"/>
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/materials.xacro"/>
+
+  <xacro:macro name="seating" params="parent_link name *origin param_file actuator_params">
+
+    <xacro:property name="yaml"                value="${param_file}"/>
+    <xacro:property name="seating_params"      value="${load_yaml(yaml)}"/>
+
+    <xacro:property name="lift_installed"      value="${seating_params['seat_lift']}"/>
+    <xacro:property name="lift_max"            value="${seating_params['lift_max']}"/>
+    <xacro:property name="tilt_installed"      value="${seating_params['seat_tilt']}"/>
+    <xacro:property name="tilt_max"            value="${seating_params['tilt_max']}"/>
+    <xacro:property name="tilt_min"            value="${seating_params['tilt_min']}"/>
+    <xacro:property name="backrest_tilt"       value="${seating_params['backrest_tilt']}"/>
+    <xacro:property name="recline_min"         value="${seating_params['recline_min']}"/>
+    <xacro:property name="recline_max"         value="${seating_params['recline_max']}"/>
+
+    <xacro:property name="base_length"         value="${seating_params['base_length']}"/>
+    <xacro:property name="base_width"          value="${seating_params['base_width']}"/>
+    <xacro:property name="base_height"         value="${seating_params['base_height']}"/>
+    <xacro:property name="base_mass"           value="${seating_params['base_mass']}"/>
+
+    <xacro:property name="cushion_length"      value="${seating_params['cushion_length']}"/>
+    <xacro:property name="cushion_width"       value="${seating_params['cushion_width']}"/>
+    <xacro:property name="cushion_height"      value="${seating_params['cushion_height']}"/>
+    <xacro:property name="cushion_mass"        value="${seating_params['cushion_mass']}"/>
+
+    <xacro:property name="backrest_x_offset"   value="${seating_params['backrest_x_offset']}"/>
+    <xacro:property name="backrest_width"      value="${seating_params['backrest_width']}"/>
+    <xacro:property name="backrest_height"     value="${seating_params['backrest_height']}"/>
+    <xacro:property name="backrest_depth"      value="${seating_params['backrest_depth']}"/>
+    <xacro:property name="backrest_mass"       value="${seating_params['backrest_mass']}"/>
+
+    <xacro:property name="back_cushion_width"  value="${seating_params['back_cushion_width']}"/>
+    <xacro:property name="back_cushion_height" value="${seating_params['back_cushion_height']}"/>
+    <xacro:property name="back_cushion_depth"  value="${seating_params['back_cushion_depth']}"/>
+    <xacro:property name="back_cushion_mass"   value="${seating_params['back_cushion_mass']}"/>
+
+    <xacro:property name="armrest_width"       value="${seating_params['armrest_width']}"/>
+    <xacro:property name="armrest_height"      value="${seating_params['armrest_height']}"/>
+    <xacro:property name="armrest_length"      value="${seating_params['armrest_length']}"/>
+    <xacro:property name="armrest_mass"        value="${seating_params['armrest_mass']}"/>
+
+    <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/xactuator.xacro"/>
+
+    <xacro:xactuator
+      actuator_params="${actuator_params}"
+      joint_name="${name}_lift_joint"
+      actuated="${lift_installed}"
+      parent_link="${parent_link}"
+      child_link="${name}_lift_link"
+      type="prismatic"
+      lower="0"
+      upper="${lift_max}">
+      <axis xyz="0 0 1"/>
+      <xacro:insert_block name="origin"/>
+    </xacro:xactuator>
+
+    <link name="${name}_lift_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <sphere radius="${base_height/4}"/>
+            </geometry>
+            <material name="iron"/>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <sphere radius="${base_height/4}"/>
+            </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <sphere radius="${base_height/4}"/>
+          </geometry>
+            <mass value="1.0"/>
+            <xacro:sphere_inertia m="1.0" r="${base_height/4}"/>
+        </inertial>
+    </link>
+
+    <xacro:xactuator
+      actuator_params="${actuator_params}"
+      joint_name="${name}_tilt_joint"
+      actuated="${tilt_installed}"
+      parent_link="${name}_lift_link"
+      child_link="${name}_base"
+      type="revolute"
+      lower="${tilt_min}"
+      upper="${tilt_max}">
+      <axis xyz="0 1 0"/>
+      <origin rpy="0 0 0" xyz="0 0 ${base_height}"/>
+    </xacro:xactuator>
+
+    <link name="${name}_base">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size=" ${base_length} ${base_width} ${base_height} "/>
+            </geometry>
+            <material name="iron"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <box size=" ${base_length} ${base_width} ${base_height} "/>
+            </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <box size=" ${base_length} ${base_width} ${base_height} "/>
+          </geometry>
+            <mass value="${base_mass}"/>
+            <xacro:box_inertia m="${base_mass}" x="${base_length}" y="${base_width}" z="${base_height}" />
+        </inertial>
+    </link>
+
+    <joint name="${name}_cushion_joint" type="fixed">
+      <origin rpy="0 0 0" xyz="0 0 ${base_height+cushion_height/2}"/>
+      <parent link="${name}_base"/>
+      <child link="${name}_cushion"/>
+    </joint>
+
+    <link name="${name}_cushion">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size=" ${cushion_length} ${cushion_width} ${cushion_height} "/>
+            </geometry>
+            <material name="plastic"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <box size=" ${cushion_length} ${cushion_width} ${cushion_height} "/>
+            </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <box size=" ${cushion_length} ${cushion_width} ${cushion_height} "/>
+          </geometry>
+            <mass value="${cushion_mass}"/>
+            <xacro:box_inertia m="${cushion_mass}" x="${cushion_length}" y="${cushion_width}" z="${cushion_height}" />
+        </inertial>
+    </link>
+
+    <xacro:xactuator
+      actuator_params="${actuator_params}"
+      joint_name="${name}_backrest_fulcrum_joint"
+      actuated="${backrest_tilt}"
+      parent_link="${name}_base"
+      child_link="${name}_backrest_fulcrum"
+      type="revolute"
+      lower="${recline_min}"
+      upper="${recline_max}">
+      <axis xyz="0 0 1"/>
+      <!-- TODO: positioning params -->
+      <origin rpy="${pi/2} -0.15 0" xyz="${-base_length/1.5} 0 ${base_height*2}"/>
+    </xacro:xactuator>
+
+    <link name="${name}_backrest_fulcrum">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+              <cylinder length="${base_width}" radius="0.01"/>
+            </geometry>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+              <cylinder length="${base_width}" radius="0.01"/>
+            </geometry>
+        </collision>
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+            <cylinder length="${base_width}" radius="0.01"/>
+          </geometry>
+            <mass value="${base_mass/4}"/>
+            <xacro:cylinder_inertia m="${base_mass/4}" r="${base_height/2}" h="${base_width}" />
+        </inertial>
+    </link>
+
+    <joint name="${name}_backrest_joint" type="fixed">
+      <origin rpy="0 0 0" xyz="${backrest_x_offset} ${backrest_height/1.5} 0"/>
+      <parent link="${name}_backrest_fulcrum"/>
+      <child link="${name}_backrest_plate"/>
+    </joint>
+
+    <link name="${name}_backrest_plate">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size=" ${backrest_depth} ${backrest_height} ${backrest_width} "/>
+            </geometry>
+            <material name="iron"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <box size=" ${backrest_depth} ${backrest_height} ${backrest_width} "/>
+            </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <box size=" ${backrest_depth} ${backrest_height} ${backrest_width} "/>
+          </geometry>
+            <mass value="${backrest_mass}"/>
+            <xacro:box_inertia m="${backrest_mass}" x="${backrest_depth}" y="${backrest_height}" z="${backrest_width}" />
+        </inertial>
+    </link>
+
+    <joint name="${name}_back_cushion_joint" type="fixed">
+      <origin rpy="0 0 0" xyz="${backrest_depth+back_cushion_depth/2} 0 0"/>
+      <parent link="${name}_backrest_plate"/>
+      <child link="${name}_backrest_cushion"/>
+    </joint>
+
+    <link name="${name}_backrest_cushion">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size=" ${back_cushion_depth} ${back_cushion_height} ${back_cushion_width} "/>
+            </geometry>
+            <material name="plastic"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <box size=" ${back_cushion_depth} ${back_cushion_height} ${back_cushion_width} "/>
+            </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <box size=" ${back_cushion_depth} ${back_cushion_height} ${back_cushion_width} "/>
+          </geometry>
+            <mass value="${back_cushion_mass}"/>
+            <xacro:box_inertia m="${back_cushion_mass}" x="${back_cushion_depth}" y="${back_cushion_height}" z="${back_cushion_width}" />
+        </inertial>
+    </link>
+
+  </xacro:macro>
+
+</robot>

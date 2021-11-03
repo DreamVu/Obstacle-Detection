@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/inertia_calc.xacro"/>
+
+    <xacro:macro name="head_rest" params="parent_link name *origin param_file">
+      <xacro:property name="yaml" value="${param_file}"/>
+      <xacro:property name="head_rest_params" value="${load_yaml(yaml)}"/>
+
+      <xacro:property name="head_rest_depth"  value="${head_rest_params['head_rest_depth']}"/>
+      <xacro:property name="head_rest_width"  value="${head_rest_params['head_rest_width']}"/>
+      <xacro:property name="head_rest_height" value="${head_rest_params['head_rest_height']}"/>
+      <xacro:property name="head_rest_mass"   value="${head_rest_params['head_rest_mass']}"/>
+
+      <link name="${name}_link">
+        <visual>
+          <origin rpy="${pi/2} 0 0" xyz="0 0 0"/> <!-- roll ? -->
+          <geometry>
+              <box size="${head_rest_depth} ${head_rest_width} ${head_rest_height}"/>
+          </geometry>
+          <material name="plastic"/>
+        </visual>
+        <collision>
+          <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
+          <geometry>
+              <box size="${head_rest_depth} ${head_rest_width} ${head_rest_height}"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="${pi/2} 0 0" xyz="0 0 0"/>
+          <geometry>
+              <box size="${head_rest_depth} ${head_rest_width} ${head_rest_height}"/>
+          </geometry>
+          <mass value="${head_rest_mass}"/>
+          <xacro:box_inertia m="${head_rest_mass}" x="${head_rest_depth}" y="${head_rest_width}" z="${head_rest_height}" />
+        </inertial>
+      </link>
+
+      <joint name="${name}_joint" type="fixed">
+        <parent link="${parent_link}"/>
+        <child link="${name}_link"/>
+        <xacro:insert_block name="origin"/>
+      </joint>
+
+    </xacro:macro>
+</robot>

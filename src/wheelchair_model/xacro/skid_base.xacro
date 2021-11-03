@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- external macros -->
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/inertia_calc.xacro"/>
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/rubber_wheel.xacro"/>
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/odometry.xacro"/>
+  <xacro:include filename="$(find nowtech_actuator_models)/xacro/motor.xacro"/>
+
+  <!-- global base_props -->
+  <xacro:property name="drive_wheel_radius"         value="${base_props['drive_wheel_radius']}"/>
+  <xacro:property name="drive_wheel_width"          value="${base_props['drive_wheel_width']}"/>
+  <xacro:property name="drive_wheel_mass"           value="${base_props['drive_wheel_mass']}"/>
+  <xacro:property name="drive_track_distance"       value="${base_props['drive_track_distance']}"/>
+  <xacro:property name="wheelbase_offset"           value="${base_props['wheelbase_offset']}"/>
+  <xacro:property name="wheelbase_distance"         value="${base_props['wheelbase_distance']}"/>
+  <xacro:property name="base_mass"                  value="${base_props['base_mass']}"/>
+  <xacro:property name="base_length"                value="${base_props['base_length']}"/>
+  <xacro:property name="base_width"                 value="${base_props['base_width']}"/>
+  <xacro:property name="base_height"                value="${base_props['base_height']}"/>
+  <!-- simulation -->
+  <xacro:property name="ground_odometry_enabled"    value="${base_props['ground_odometry_enabled']}"/>
+
+
+  <xacro:macro name="motorized_wheel" params="name parent_link *origin motor_params">
+    <!-- type of motor simulation -->
+    <xacro:property name="motor_props" value="${load_yaml(motor_params)}"/>
+    <xacro:property name="simulate_dc_motor" value="${motor_props['motor_type']=='dc_motor'}"/>
+
+    <xacro:rubber_wheel name="${name}_wheel"
+      wheel_radius="${drive_wheel_radius}"
+      wheel_width="${drive_wheel_width}"
+      wheel_mass="${drive_wheel_mass}"
+    ></xacro:rubber_wheel>
+    <xacro:if value="${simulate_dc_motor}">
+      <xacro:dc_motor motor_name="${name}_motor" parent_link="${parent_link}" child_link="${name}_wheel">
+        <xacro:property name="params_yaml" value="${motor_params}"/>
+        <xacro:insert_block name="origin"/>
+      </xacro:dc_motor>
+    </xacro:if>
+    <xacro:unless value="${simulate_dc_motor}">
+      <xacro:joint_motor motor_name="${name}_motor" parent_link="${parent_link}" child_link="${name}_wheel">
+        <xacro:property name="params_yaml" value="${motor_params}"/>
+        <xacro:insert_block name="origin"/>
+      </xacro:joint_motor>
+    </xacro:unless>
+  </xacro:macro>
+
+  <xacro:macro name="skid_base_4wd" params="motor_params">
+
+      <link name="base_footprint"/>
+      <link name="base_link">
+          <visual>
+              <origin rpy="0 0 0" xyz="0 0 0"/>
+              <geometry>
+                  <box size=" ${base_length} ${base_width} ${base_height} "/>
+              </geometry>
+          </visual>
+          <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+              <geometry>
+                <box size=" ${base_length} ${base_width} ${base_height} "/>
+              </geometry>
+          </collision>
+          <inertial>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <box size="${base_length} ${base_width} ${base_height} "/>
+            </geometry>
+              <mass value="${base_mass}"/>
+              <xacro:box_inertia m="${base_mass}" x="${base_length}" y="${base_width}" z="${base_height}" />
+          </inertial>
+      </link>
+      <joint name="footprint_joint" type="fixed">
+        <origin rpy="0 0 ${pi}" xyz="0 0 ${drive_wheel_radius}"/>
+        <parent link="base_footprint"/>
+        <child link="base_link"/>
+      </joint>
+
+      <xacro:motorized_wheel name="front_left" parent_link="base_link" motor_params="${motor_params}">
+        <origin rpy="${-pi/2} 0 0" xyz="${wheelbase_offset+wheelbase_distance/2} ${drive_track_distance/2} 0"/>
+      </xacro:motorized_wheel>
+      <xacro:motorized_wheel name="front_right" parent_link="base_link" motor_params="${motor_params}">
+        <origin rpy="${-pi/2} 0 0" xyz="${wheelbase_offset+wheelbase_distance/2} ${-drive_track_distance/2} 0"/>
+      </xacro:motorized_wheel>
+      <xacro:motorized_wheel name="rear_left" parent_link="base_link" motor_params="${motor_params}">
+        <origin rpy="${-pi/2} 0 0" xyz="${wheelbase_offset-wheelbase_distance/2} ${drive_track_distance/2} 0"/>
+      </xacro:motorized_wheel>
+      <xacro:motorized_wheel name="rear_right" parent_link="base_link" motor_params="${motor_params}">
+        <origin rpy="${-pi/2} 0 0" xyz="${wheelbase_offset-wheelbase_distance/2} ${-drive_track_distance/2} 0"/>
+      </xacro:motorized_wheel>
+
+  </xacro:macro>
+
+  <!-- drive method selection -->
+  <xacro:macro name="base" params="method:=^|'4WD' motor_yaml">
+    <xacro:if value="${method == '4WD'}">
+      <xacro:skid_base_4wd motor_params="${motor_yaml}"></xacro:skid_base_4wd>
+      <xacro:ground_odometry enabled="${ground_odometry_enabled}"></xacro:ground_odometry>
+    </xacro:if>
+    <xacro:if value="${method != '4WD'}">
+      <xacro:skid_base_4wd motor_params="${motor_yaml}">></xacro:skid_base_4wd>
+      <xacro:ground_odometry enabled="${ground_odometry_enabled}"></xacro:ground_odometry>
+    </xacro:if>
+  </xacro:macro>
+
+</robot>

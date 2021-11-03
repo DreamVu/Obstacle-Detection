@@ -1,0 +1,5 @@
+#distance between tracks
+wheel_separation: 0.54
+wheel_radius: 0.17
+#wheter to output tangent or angular wheel velocity
+output_tangent_wheel_speed: false

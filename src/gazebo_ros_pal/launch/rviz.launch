@@ -1,0 +1,7 @@
+<launch>
+  <node
+    name="rviz"
+    pkg="rviz"
+    type="rviz"
+    args="-d $(find gazebo_ros_pal)/urdf.rviz" />
+</launch>

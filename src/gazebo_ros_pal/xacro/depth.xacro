@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:macro name="pal_depth" params="sensor_name parent_link rate *origin">
+
+  <joint name="${sensor_name}_joint" type="fixed">
+    <parent link="${parent_link}"/>
+    <child link="${sensor_name}"/>
+    <xacro:insert_block name="origin"/>
+  </joint>
+
+  <link name="${sensor_name}">
+      <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/> <!-- gazebo camera transform compensation -->
+          <geometry>
+              <mesh filename="package://gazebo_ros_pal/meshes/pal.STL"/>
+          </geometry>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+              <mesh filename="package://gazebo_ros_pal/meshes/pal.STL"/>
+          </geometry>
+      </collision>
+      <inertial>
+        <origin
+          xyz="-8.3767E-19 0.039154 7.7658E-09"
+          rpy="0 0 0" />
+        <mass
+          value="0.61118" />
+        <inertia
+          ixx="0.00073089"
+          ixy="6.9777E-21"
+          ixz="2.8195E-26"
+          iyy="0.00067219"
+          iyz="3.0805E-09"
+          izz="0.00073089" />
+      </inertial>
+  </link>
+
+  <link name="${sensor_name}_optical_front"/>
+  <joint name="${sensor_name}_front_joint" type="fixed">
+    <parent link="${sensor_name}"/>
+    <child link="${sensor_name}_optical_front"/>
+    <origin rpy="0 0 0" xyz="0 0 0.05"/>
+  </joint>
+
+  <gazebo reference="${sensor_name}_optical_front">
+    <sensor type="depth" name="${sensor_name}_front">
+      <always_on>true</always_on>
+      <update_rate>${rate}</update_rate>
+      <camera>
+          <horizontal_fov>${pi/2}</horizontal_fov>
+          <vertical_fov>1.9</vertical_fov> <!-- in reality VFOV is assymetric to the floor plane -->
+          <image>
+              <format>R8G8B8</format>
+              <width>157</width>
+              <height>190</height>
+          </image>
+          <clip>
+              <near>0.1</near>
+              <far>10.0</far>
+          </clip>
+      </camera>
+      <plugin name="${sensor_name}" filename="libgazebo_ros_pal_openni_kinect.so"> <!-- libgazebo_ros_depth_camera.so depth images won't show in rviz -->
+          <alwaysOn>true</alwaysOn>
+          <updateRate>${rate}</updateRate>
+          <cameraName>${sensor_name}_front</cameraName>
+          <depthImageTopicName>image_depth</depthImageTopicName>
+          <depthImageCameraInfoTopicName>camera_info</depthImageCameraInfoTopicName>
+          <pointCloudTopicName>${sensor_name}_front/points_raw</pointCloudTopicName>
+          <frameName>${sensor_name}_optical_front</frameName>
+          <pointCloudCutoff>0.05</pointCloudCutoff>
+          <distortionK1>0</distortionK1> <!-- let's pretend that there are no distortions -->
+          <distortionK2>0</distortionK2>
+          <distortionK3>0</distortionK3>
+          <distortionT1>0</distortionT1>
+          <distortionT2>0</distortionT2>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  </xacro:macro>
+
+</robot>

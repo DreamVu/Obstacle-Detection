@@ -1,0 +1,16 @@
+enabled   :  true
+reference :  base_link
+# head lights
+head_topic:  headlight
+head_pitch: -1.2
+head_dist :  0.5
+head_pos_x:  0.25
+head_pos_z:  0.25
+head_off_z:  0.17
+# tail lights
+tail_topic:  backlight
+tail_pitch:  1.57
+tail_dist :  0.3
+tail_pos_x: -0.35
+tail_pos_z:  0.12
+tail_off_z:  0.17

@@ -1,0 +1,7 @@
+In order to visualize the URDF model follow the steps mentioned below from catkin_ws: 
+
+1. $ source devel/setup.bash
+2. $ catkin_make
+3. $ roslaunch pal gazebo.launch			# To visualize on gazebo
+	or
+   $ roslaunch pal display.launch			# To visualize on rviz	

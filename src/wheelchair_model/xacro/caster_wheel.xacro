@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/inertia_calc.xacro"/>
+  <!-- caster wheel macro -->
+  <xacro:macro name="caster_wheel" params="name parent_link *origin suspension stiffness wheel_radius wheel_width wheel_mass x_axis_offset z_axis_offset">
+
+    <xacro:if value="${suspension}">
+      <link name="${name}_casterhub_suspension">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="0.001 0.001 0.001"/>
+            </geometry>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <box size="0.001 0.001 0.001"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <box size="0.001 0.001 0.001"/>
+            </geometry>
+            <mass value="0.2"/>
+            <xacro:box_inertia m="0.2" x="0.001" y="0.001" z="0.001" />
+        </inertial>
+      </link>
+      <gazebo reference="${name}_casterhub_suspension">
+          <gravity>true</gravity>
+          <selfCollide>true</selfCollide>
+          <mu1 value="200.0"/>
+          <mu2 value="100.0"/>
+          <kp value="10000000.0"/>
+          <kd value="1.0"/>
+      </gazebo>
+      <joint name="${name}_hub_suspension_joint" type="prismatic">
+          <parent link="${parent_link}"/>
+          <child link="${name}_casterhub_suspension"/>
+          <xacro:insert_block name="origin"/>
+          <axis xyz="0 0 1"/>
+          <limit effort="1000.0" velocity="0.01" lower="-0.025" upper="0.025"/>
+          <dynamics damping="0.5" friction="0.0"/>
+      </joint>
+      <gazebo reference="${name}_hub_suspension_joint">
+          <implicitSpringDamper>true</implicitSpringDamper>
+          <springStiffness>${stiffness}</springStiffness>
+          <springReference>0.01</springReference>
+          <stopKd>1000000.0</stopKd>
+          <stopKp>1000000.0</stopKp>
+      </gazebo>
+      <joint name="${name}_casterhub_joint" type="continuous">
+          <parent link="${name}_casterhub_suspension"/>
+          <child link="${name}_casterhub_link"/>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <!-- <xacro:insert_block name="origin"/> -->
+          <axis xyz="0 0 1"/>
+      </joint>
+    </xacro:if>
+
+    <xacro:unless value="${suspension}">
+      <joint name="${name}_casterhub_joint" type="continuous">
+          <parent link="${parent_link}"/>
+          <child link="${name}_casterhub_link"/>
+          <xacro:insert_block name="origin"/>
+          <axis xyz="0 0 1"/>
+      </joint>
+    </xacro:unless>
+
+    <link name="${name}_casterhub_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <sphere radius="0.01"/>
+            </geometry>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <sphere radius="0.01"/>
+            </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <sphere radius="0.01"/>
+          </geometry>
+            <mass value="1.0"/>
+            <xacro:sphere_inertia m="1.0" r="0.01"/>
+        </inertial>
+    </link>
+    <gazebo reference="${name}_casterhub_link">
+        <selfCollide>true</selfCollide>
+        <mu1 value="200.0"/>
+        <mu2 value="100.0"/>
+        <kp value="10000000.0"/>
+        <kd value="1.0"/>
+    </gazebo>
+
+    <link name="${name}_casterwheel_link">
+        <visual>
+            <geometry>
+                <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            </geometry>
+            <material name="rubber"/>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+              <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+            </geometry>
+        </collision>
+        <inertial>
+          <origin xyz="0 0 0" rpy="0 0 0"/>
+          <geometry>
+            <cylinder length="${wheel_width}" radius="${wheel_radius}"/>
+          </geometry>
+            <mass value="${wheel_mass}"/>
+            <xacro:cylinder_inertia m="${wheel_mass}" r="${wheel_radius}" h="${wheel_width}" />
+        </inertial>
+    </link>
+    <joint name="${name}_casterwheel_joint" type="continuous">
+        <parent link="${name}_casterhub_link"/>
+        <child link="${name}_casterwheel_link"/>
+        <origin rpy="-1.57 0 0" xyz="${-x_axis_offset} 0 ${z_axis_offset}"/>
+        <dynamics damping="0.0" friction="0.0"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+    <gazebo reference="${name}_casterwheel_link">
+        <selfCollide>true</selfCollide>
+        <mu1 value="200.0"/>
+        <mu2 value="100.0"/>
+        <kp value="10000000.0"/>
+        <kd value="1.0"/>
+    </gazebo>
+  </xacro:macro>
+
+</robot>

@@ -1,0 +1,32 @@
+wheelchair:
+
+    # gazebo_ros_control:
+    #   pid_gains:
+    #     seat_lift_joint:
+    #       p: 200.0
+    #       i: 1.0
+    #       d: 30.0
+
+    joint_state_controller:
+        type: joint_state_controller/JointStateController
+        publish_rate: 20
+
+    seat_lift:
+        type: position_controllers/JointPositionController
+        joint: seat_lift_joint
+
+    seat_tilt:
+        type: position_controllers/JointPositionController
+        joint: seat_tilt_joint
+
+    seat_backrest:
+        type: position_controllers/JointPositionController
+        joint: seat_backrest_fulcrum_joint
+
+    legrest_angle:
+        type: position_controllers/JointPositionController
+        joint: legrest_angle_joint
+
+    legrest_length:
+        type: position_controllers/JointPositionController
+        joint: legrest_inlet_joint    

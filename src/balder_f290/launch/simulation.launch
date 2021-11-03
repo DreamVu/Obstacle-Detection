@@ -1,0 +1,35 @@
+<launch>
+
+  <!-- Simulation setup -->
+  <!-- <arg name="world"             default="park"/> city, flat, office, cafe, factory, bookstore, grocery -->
+  <arg name="load_world"        default="true"/>
+  <arg name="gazebo_enabled"    default="true"/>
+  <arg name="gazebo_gui"        default="true"/>
+  <arg name="sim_dc_motor"      default="false"/>
+
+  <!-- Model parameter setup -->
+	<arg name="model" default="$(find balder_f290)/xacro/wheelchair.xacro"/>
+
+  <!-- Run simulator -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch" if="$(arg gazebo_enabled)">
+    <!-- <arg name="world_name"    value="$(find nowtech_worlds)/worlds/$(arg world).world" if="$(arg load_world)"/> -->
+    <arg name="world_name"    value="$(find nowtech_wheelchair_model)/worlds/practice.world" if="$(arg load_world)"/>
+    <arg name="paused"        value="false"/>
+    <arg name="use_sim_time"  value="true"/>
+    <arg name="gui"           value="$(arg gazebo_gui)"/>
+    <arg name="headless"      value="false"/>
+    <arg name="recording"     value="false"/>
+    <arg name="debug"         value="false"/>
+  </include>
+
+  <!-- Generate URDF -->
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model) sim_dc_motor:=$(arg sim_dc_motor)" />
+
+  <!-- State publishers -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <!-- Spawn model to Gazebo -->
+  <node  name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" args="-z 0.5 -unpause -urdf -model balder_f290 -param robot_description" respawn="false"/>
+
+</launch>

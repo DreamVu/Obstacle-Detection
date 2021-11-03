@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>balder_f290</name>
+  <version>1.1.0</version>
+  <description>Balder F290 Wheelchair Model</description>
+  <maintainer email="marton@nowtech.hu">nils</maintainer>
+  <license>NO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>

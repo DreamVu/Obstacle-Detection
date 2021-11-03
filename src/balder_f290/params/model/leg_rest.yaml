@@ -1,0 +1,20 @@
+enabled:           true
+parent_link:       seat_base
+position_x:        0.25 # ?
+position_y:        0.0
+position_z:        -0.01
+default_angle:     0.8
+rod_height:        0.02
+rod_width:         0.04
+rod_length:        0.3
+rod_mass:          5.0
+plate_width:       0.3 # ?
+plate_depth:       0.2 # ?
+plate_height:      0.005
+plate_mass:        5.0 # ?
+# actuators
+angle_adjustable:  false
+min_angle:        -0.5
+max_angle:         0.5
+length_adjustable: false
+max_length:        0.1

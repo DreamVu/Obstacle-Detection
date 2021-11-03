@@ -1,0 +1,9 @@
+<launch>
+
+  <node name="depth_to_laser_node" pkg="nowtech_depth_tools" type="depth_to_laser_node" output="screen">
+		<rosparam command="load" file="$(find gazebo_ros_pal)/params/depth_to_laser.yaml"/>
+  	<remap from="image" to="/pal_front/image_depth"/>
+  	<remap from="camera_info" to="/pal_front/camera_info"/>
+	</node>
+
+</launch>

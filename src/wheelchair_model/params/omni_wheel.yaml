@@ -1,0 +1,9 @@
+main_wheel_radius: 0.05
+main_wheel_width:  0.03
+main_wheel_mass:   0.50
+num_of_subwheels:  16
+sub_wheel_radius:  0.02
+sub_wheel_width:   0.01
+sub_wheel_mass:    0.10
+sub_wheel_damping:  0.0
+sub_wheel_friction: 0.1

@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<robot name="balder_f290" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:arg name="sim_dc_motor" default="false" />
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/wheelchair.xacro"/>
+  <xacro:wheelchair_model namespace="balder_f290" package="balder_f290" sim_dc_motor="$(arg sim_dc_motor)"/>
+</robot>

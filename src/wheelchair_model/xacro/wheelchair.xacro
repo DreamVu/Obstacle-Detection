@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="wheelchair_model" params="namespace package sim_dc_motor">
+
+    <!-- global wheelchair properties -->
+    <xacro:property name="wheelchair_yaml"    value="$(find ${package})/params/wheelchair.yaml"/>
+    <xacro:property name="wheelchair_props"   value="${load_yaml(wheelchair_yaml)}"/>
+
+    <!-- base -->
+    <xacro:property name="base_yaml"  value="$(find ${package})/params/${wheelchair_props['base_params']}"/>
+    <xacro:property name="base_props" value="${load_yaml(base_yaml)}"/>
+    <xacro:property name="base_type"  value="${base_props['base_type']}"/>
+
+    <xacro:if value="${sim_dc_motor}">
+      <xacro:property name="motor_yaml" value="$(find ${package})/params/${wheelchair_props['dc_motor_params']}"/>
+    </xacro:if>
+    <xacro:unless value="${sim_dc_motor}">
+      <xacro:property name="motor_yaml" value="$(find ${package})/params/${wheelchair_props['joint_motor_params']}"/>
+    </xacro:unless>
+
+    <xacro:include  filename="$(find nowtech_wheelchair_model)/xacro/${base_type}_base.xacro"/>
+    <xacro:base method="${base_props['drive_method']}" motor_yaml="${motor_yaml}"/>
+
+    <!-- actuators -->
+    <xacro:if value="${wheelchair_props['actuator_enabled']}">
+      <xacro:property name="act_yaml"   value="$(find ${package})/params/${wheelchair_props['actuator_params']}"/>
+      <xacro:property name="act_props"  value="${load_yaml(act_yaml)}"/>
+    </xacro:if>
+
+    <!-- seating -->
+    <xacro:if value="${wheelchair_props['seating_enabled']}">
+      <xacro:property name="seating_yaml"  value="$(find ${package})/params/${wheelchair_props['seating_params']}"/>
+      <xacro:property name="seating_props" value="${load_yaml(seating_yaml)}"/>
+      <xacro:include  filename="$(find nowtech_wheelchair_model)/xacro/seating.xacro"/>
+      <xacro:seating name="seat" parent_link="${seating_props['parent_link']}" param_file="${seating_yaml}" actuator_params="${act_yaml}">
+        <origin xyz="${seating_props['position_x']} ${seating_props['position_y']} ${seating_props['position_z']}" rpy="0 0 ${(base_props['drive_method']!='front')*pi}"/>
+      </xacro:seating>
+    </xacro:if>
+
+    <!-- leg rest -->
+    <xacro:if value="${wheelchair_props['legrest_enabled']}">
+      <xacro:property name="legrest_yaml" value="$(find ${package})/params/${wheelchair_props['legrest_params']}"/>
+      <xacro:property name="legrest_props" value="${load_yaml(legrest_yaml)}"/>
+      <xacro:include  filename="$(find nowtech_wheelchair_model)/xacro/leg_rest.xacro"/>
+      <xacro:leg_rest name="legrest" parent_link="${legrest_props['parent_link']}" param_file="${legrest_yaml}" actuator_params="${act_yaml}">
+        <origin xyz="${legrest_props['position_x']} ${legrest_props['position_y']} ${legrest_props['position_z']}" rpy="0 ${legrest_props['default_angle']} 0"/>
+      </xacro:leg_rest>
+    </xacro:if>
+
+    <!-- arm rest -->
+    <xacro:if value="${wheelchair_props['armrest_enabled']}">
+      <xacro:property name="armrest_yaml" value="$(find ${package})/params/${wheelchair_props['armrest_params']}"/>
+      <xacro:property name="armrest_props" value="${load_yaml(armrest_yaml)}"/>
+      <xacro:include  filename="$(find nowtech_wheelchair_model)/xacro/arm_rest.xacro"/>
+      <xacro:arm_rest name="left_arm_rest" parent_link="${armrest_props['parent_link']}" param_file="${armrest_yaml}">
+        <origin xyz="${armrest_props['position_x']} ${armrest_props['arm_rest_distance']/2} ${armrest_props['position_z']}" rpy="0 0 0"/>
+      </xacro:arm_rest>
+      <xacro:arm_rest name="right_arm_rest" parent_link="${armrest_props['parent_link']}" param_file="${armrest_yaml}">
+        <origin xyz="${armrest_props['position_x']} -${armrest_props['arm_rest_distance']/2} ${armrest_props['position_z']}" rpy="0 0 0"/>
+      </xacro:arm_rest>
+    </xacro:if>
+
+    <!-- head rest -->
+    <xacro:if value="${wheelchair_props['headrest_enabled']}">
+      <xacro:property name="headrest_yaml" value="$(find ${package})/params/${wheelchair_props['headrest_params']}"/>
+      <xacro:property name="headrest_props" value="${load_yaml(headrest_yaml)}"/>
+      <xacro:include  filename="$(find nowtech_wheelchair_model)/xacro/head_rest.xacro"/>
+      <xacro:head_rest name="headrest" parent_link="${headrest_props['parent_link']}" param_file="${headrest_yaml}">
+        <origin xyz="${headrest_props['position_x']} ${headrest_props['position_z']+headrest_props['head_rest_height']} ${headrest_props['position_y']}" rpy="0 0 0"/>
+      </xacro:head_rest>
+    </xacro:if>
+
+    <!-- lighting -->
+    <xacro:if value="${wheelchair_props['lighting_enabled']}">
+      <xacro:property name="light_yaml" value="$(find ${package})/params/${wheelchair_props['lighting_params']}"/>
+      <xacro:property name="light_props" value="${load_yaml(light_yaml)}"/>
+      <xacro:include  filename="$(find nowtech_wheelchair_model)/xacro/lights.xacro"/>
+      <xacro:lighting param_file="${light_yaml}"></xacro:lighting>
+    </xacro:if>
+
+    <!-- ros_control actuator option -->
+    <xacro:if value="${wheelchair_props['actuator_enabled']}">
+      <xacro:unless value="${act_props['interface'] == 'nowtech'}">
+        <gazebo>
+          <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+            <robotNamespace>${namespace}</robotNamespace>
+          </plugin>
+        </gazebo>
+      </xacro:unless>
+    </xacro:if>
+
+  </xacro:macro>
+
+</robot>

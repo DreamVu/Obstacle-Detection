@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<xacro:macro name="servo" params="motor_name parent_link child_link *origin type update_rate lower_limit upper_limit filter_coeff">
+
+  <xacro:if value="${type == 'linear'}">
+    <xacro:property name="joint_type" value="prismatic"/>
+  </xacro:if>
+  <xacro:if value="${type == 'angular'}">
+    <xacro:property name="joint_type" value="revolute"/>
+  </xacro:if>
+  <!-- make it fixed if type not provided -->
+  <xacro:if value="${type != 'angular' and type != 'linear'}">
+    <xacro:property name="joint_type" value="fixed"/>
+  </xacro:if>
+
+  <joint name="${motor_name}" type="${joint_type}">
+      <parent link="${parent_link}"/>
+      <child link="${child_link}"/>
+      <xacro:insert_block name="origin"/>
+      <limit effort="1000" velocity="0" lower="${lower_limit}" upper="${upper_limit}"/>
+      <axis xyz="0 0 1"/>
+  </joint>
+
+  <gazebo>
+    <plugin name="${motor_name}" filename="libnowtech_gazebo_ros_simple_servo.so">
+       <update_rate>${update_rate}</update_rate>
+       <actuator_velocity>${filter_coeff}</actuator_velocity>
+       <actuated_joint>${motor_name}</actuated_joint>
+       <servo_name>${motor_name}</servo_name>
+       <command_topic>${motor_name}/command</command_topic>
+     </plugin>
+  </gazebo>
+
+</xacro:macro>
+
+
+</robot>

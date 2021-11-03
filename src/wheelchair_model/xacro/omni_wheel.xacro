@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/inertia_calc.xacro"/>
+
+  <xacro:macro name="omni_wheel" params="name param_file">
+
+    <xacro:property name="omni_yaml"  value="${param_file}"/>
+    <xacro:property name="omni_wheel_params"  value="${load_yaml(omni_yaml)}"/>
+    <xacro:property name="main_wheel_radius"  value="${omni_wheel_params['main_wheel_radius']}"/>
+    <xacro:property name="main_wheel_width"   value="${omni_wheel_params['main_wheel_width']}"/>
+    <xacro:property name="main_wheel_mass"    value="${omni_wheel_params['main_wheel_mass']}"/>
+    <xacro:property name="num_of_subwheels"   value="${omni_wheel_params['num_of_subwheels']}"/>
+    <xacro:property name="sub_wheel_radius"   value="${omni_wheel_params['sub_wheel_radius']}"/>
+    <xacro:property name="sub_wheel_width"    value="${omni_wheel_params['sub_wheel_width']}"/>
+    <xacro:property name="sub_wheel_mass"     value="${omni_wheel_params['sub_wheel_mass']}"/>
+    <xacro:property name="sub_wheel_damping"  value="${omni_wheel_params['sub_wheel_damping']}"/>
+    <xacro:property name="sub_wheel_friction" value="${omni_wheel_params['sub_wheel_friction']}"/>
+
+    <link name="${name}">
+      <visual>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <cylinder length="${main_wheel_width}" radius="${main_wheel_radius}"/>
+        </geometry>
+      </visual>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <cylinder length="${main_wheel_width}" radius="${main_wheel_radius}"/>
+        </geometry>
+        <mass value="${main_wheel_mass}"/>
+        <xacro:cylinder_inertia m="${main_wheel_mass}" r="${main_wheel_radius}" h="${main_wheel_width}" />
+      </inertial>
+    </link>
+
+    <xacro:property name="arc" value="${(2*pi)/num_of_subwheels}"/>
+
+    <xacro:macro name="loop" params="links_qty">
+        <xacro:if value="${links_qty}">
+            <xacro:loop links_qty="${links_qty-1}" />
+            <link name="${name}_subwheel_${links_qty-1}">
+              <visual>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                  <cylinder length="${sub_wheel_width}" radius="${sub_wheel_radius}"/>
+                </geometry>
+              </visual>
+              <collision>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                  <cylinder length="${sub_wheel_width}" radius="${sub_wheel_radius}"/>
+                </geometry>
+              </collision>
+              <inertial>
+                <origin rpy="0 0 0" xyz="0 0 0"/>
+                <geometry>
+                  <cylinder length="${sub_wheel_width}" radius="${sub_wheel_radius}"/>
+                </geometry>
+                <mass value="${sub_wheel_mass}"/>
+                <xacro:cylinder_inertia m="${sub_wheel_mass}" r="${sub_wheel_radius}" h="${sub_wheel_width}" />
+              </inertial>
+            </link>
+            <joint name="${name}_subwheel_${links_qty-1}_joint" type="continuous">
+                <parent link="${name}"/>
+                <child link="${name}_subwheel_${links_qty-1}"/>
+                <origin rpy="0 ${pi/2} ${(2*pi)-(arc*links_qty)}" xyz="${sin(arc*links_qty)*main_wheel_radius} ${cos(arc*links_qty)*main_wheel_radius} 0"/>
+                <axis xyz="0 0 1"/>
+                <dynamics damping="${sub_wheel_damping}" friction="${sub_wheel_friction}"/>
+            </joint>
+        </xacro:if>
+    </xacro:macro>
+
+    <xacro:loop links_qty="${num_of_subwheels}" />
+
+  </xacro:macro>
+
+</robot>

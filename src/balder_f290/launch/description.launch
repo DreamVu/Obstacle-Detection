@@ -1,0 +1,9 @@
+<launch>
+  <arg name="sim_dc_motor"      default="false"/>
+  <arg name="model" default="$(find balder_f290)/xacro/wheelchair.xacro"/>
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model) sim_dc_motor:=$(arg sim_dc_motor)" />
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+    <param name="use_gui" value="true"/>
+  </node>
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+</launch>

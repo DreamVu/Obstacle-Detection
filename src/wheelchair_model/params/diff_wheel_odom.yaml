@@ -1,0 +1,8 @@
+wheel_separation: 0.54
+wheel_radius: 0.17
+ICC_method: true
+tf_enabled: true
+input_tangent_wheel_speed: false
+publish_rate: 100
+base_frame: base_footprint
+global_frame: odom

@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/inertia_calc.xacro"/>
+  <xacro:include filename="$(find nowtech_actuator_models)/xacro/light.xacro"/>
+
+  <xacro:macro name="lighting" params="param_file">
+
+    <xacro:property  name="yaml"          value="${param_file}"/>
+    <xacro:property  name="light_params"  value="${load_yaml(yaml)}"/>
+    <xacro:property  name="reference"     value="${light_params['reference']}"/>
+
+    <xacro:property  name="head_topic"    value="${light_params['head_topic']}"/>
+    <xacro:property  name="head_pitch"    value="${light_params['head_pitch']}"/>
+    <xacro:property  name="head_dist"     value="${light_params['head_dist']}"/>
+    <xacro:property  name="head_pos_x"    value="${light_params['head_pos_x']}"/>
+    <xacro:property  name="head_pos_z"    value="${light_params['head_pos_z']}"/>
+    <xacro:property  name="head_off_z"    value="${light_params['head_off_z']}"/>
+
+    <xacro:property  name="tail_topic"    value="${light_params['tail_topic']}"/>
+    <xacro:property  name="tail_pitch"    value="${light_params['tail_pitch']}"/>
+    <xacro:property  name="tail_dist"     value="${light_params['tail_dist']}"/>
+    <xacro:property  name="tail_pos_x"    value="${light_params['tail_pos_x']}"/>
+    <xacro:property  name="tail_pos_z"    value="${light_params['tail_pos_z']}"/>
+    <xacro:property  name="tail_off_z"    value="${light_params['tail_off_z']}"/>
+
+    <xacro:headlight name="head_light_left"
+      topic="${head_topic}"
+      parent_link="${reference}"
+      x="${head_pos_x}"
+      y="${head_dist/2}"
+      z="${head_pos_z}"
+      z_offset="${head_off_z}"
+      roll="0"
+      pitch="${head_pitch}"
+      yaw="0">
+    </xacro:headlight>
+
+    <xacro:headlight name="head_light_right"
+      topic="${head_topic}"
+      parent_link="${reference}"
+      x="${head_pos_x}"
+      y="${-head_dist/2}"
+      z="${head_pos_z}"
+      z_offset="${head_off_z}"
+      roll="0"
+      pitch="${head_pitch}"
+      yaw="0">
+    </xacro:headlight>
+
+    <xacro:backlight name="tail_light_left"
+      topic="${tail_topic}"
+      parent_link="${reference}"
+      x="${tail_pos_x}"
+      y="${tail_dist/2}"
+      z="${tail_pos_z}"
+      z_offset="${tail_off_z}"
+      roll="0"
+      pitch="${tail_pitch}"
+      yaw="0">
+    </xacro:backlight>
+
+    <xacro:backlight name="tail_light_right"
+      topic="${tail_topic}"
+      parent_link="${reference}"
+      x="${tail_pos_x}"
+      y="${-tail_dist/2}"
+      z="${tail_pos_z}"
+      z_offset="${tail_off_z}"
+      roll="0"
+      pitch="${tail_pitch}"
+      yaw="0">
+    </xacro:backlight>
+
+  </xacro:macro>
+
+</robot>

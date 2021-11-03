@@ -1,0 +1,13 @@
+interface          : nowtech
+# general joint params
+servo_effort       : 10.0
+servo_velocity     : 1.0
+# nowtech servo params
+servo_update_freq  : 100
+servo_motion_filter: 0.1
+servo_accuracy     : 0.01
+servo_fmax         : 1000.0
+servo_fudge        : 1.0
+# ros_control
+servo_torque       : 10
+servo_reduction    : 1

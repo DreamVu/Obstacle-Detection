@@ -1,0 +1,20 @@
+base_type: differential
+drive_method: front # middle
+drive_wheel_radius: 0.17
+drive_wheel_width: 0.07
+drive_wheel_mass: 3.5
+drive_track_distance: 0.54 # distance of drive wheel ground contact points
+drive_axis_to_base_center: 0.23 # distance of the motor axis and the center of the base on the x axis
+wheelbase_distance: 0.66 # distance of the motor axis and the caster hub joint on the x axis
+caster_wheel_radius: 0.1
+caster_wheel_width: 0.07
+caster_wheel_mass: 3.0
+caster_axis_off_center: 0.05 # distance of caster wheel center from the hub joint on the x axis
+caster_track_distance: 0.38 # distance of caster wheel ground contact points
+mid_wheel_caster_distance: 0.9 # when driven wheels are in the middle this assumes symmetric caster config
+base_x_offset: 0.14
+base_mass: 60.0
+base_length: 0.5
+base_width: 0.42
+base_height: 0.17
+ground_odometry_enabled: true

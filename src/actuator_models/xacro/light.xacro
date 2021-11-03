@@ -1,0 +1,198 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<!-- WHEELCHAIR HEADLIGHT -->
+
+    <xacro:macro name="headlight" params="name parent_link topic x y z roll pitch yaw z_offset">
+
+      <joint name="${name}_frame_joint" type="fixed">
+        <parent link="${parent_link}"/>
+        <child link="${name}_frame"/>
+        <origin xyz="${x} ${y} ${z}" rpy="${roll} ${pitch} ${yaw}"/>
+      </joint>
+
+      <link name="${name}_frame">
+        <visual>
+          <origin rpy="0 0 0 " xyz="0 0 0.01"/>
+          <geometry>
+            <cylinder radius="0.02" length="0.02"/>
+          </geometry>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0 " xyz="0 0 0.01"/>
+          <geometry>
+            <cylinder radius="0.02" length="0.02"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 0 0 " xyz="0 0 0.01"/>
+          <geometry>
+            <cylinder radius="0.02" length="0.02"/>
+          </geometry>
+          <mass value="0.5"/>
+          <xacro:cylinder_inertia m="0.5" r="0.02" h="0.02"/>
+        </inertial>
+      </link>
+
+      <gazebo>
+          <link name='${name}_light_source'>
+            <pose>${x} ${y} ${z+z_offset} ${roll} ${pitch} ${yaw}</pose>
+            <inertial>
+              <mass>0.0025</mass>
+              <inertia>
+                <ixx>1.0e-05</ixx>
+                <ixy>0</ixy>
+                <ixz>0</ixz>
+                <iyy>1.0e-05</iyy>
+                <iyz>0</iyz>
+                <izz>1.0e-05</izz>
+              </inertia>
+            </inertial>
+            <light name='${name}_lamp' type='spot'>
+              <pose>0 0 -0.005 0 0 0</pose>
+              <attenuation>
+                <range>4</range>
+                <linear>0</linear>
+                <constant>0.1</constant>
+                <quadratic>0.01</quadratic>
+              </attenuation>
+              <diffuse>0.8 0.8 0.5 1</diffuse>
+              <specular>0.8 0.8 0.5 1</specular>
+              <spot>
+                <inner_angle>0.2</inner_angle>
+                <outer_angle>0.5</outer_angle>
+                <falloff>1</falloff>
+              </spot>
+              <direction>0 0 -1</direction>
+            </light>
+            <visual name='${name}_lamp'>
+              <geometry>
+                <cylinder>
+                  <radius>0.019</radius>
+                  <length>0.005</length>
+                </cylinder>
+              </geometry>
+              <transparency>0.0</transparency>
+              <material>
+                <ambient>1 1 1 1</ambient>
+                <diffuse>1 1 1 1</diffuse>
+                <specular>1 1 1 1</specular>
+                <emissive>0.8 0.8 0.5 1</emissive>
+              </material>
+            </visual>
+          </link>
+          <plugin name='${name}_control' filename='libnowtech_gazebo_ros_light.so'>
+              <enable>true</enable>
+              <light>
+                <id>${name}_light_source/${name}_lamp</id>
+              </light>
+              <rosDebugLevel>Debug</rosDebugLevel>
+              <command_topic>${topic}</command_topic>
+          </plugin>
+      </gazebo>
+      <gazebo>
+        <joint name='${name}_lightsource_joint' type='fixed'>
+          <parent>${name}_frame</parent>
+          <child>${name}_light_source</child>
+        </joint>
+      </gazebo>
+    </xacro:macro>
+
+<!-- WHEELCHAIR BACKLIGHT -->
+
+    <xacro:macro name="backlight" params="name parent_link topic x y z roll pitch yaw z_offset">
+
+      <joint name="${name}_frame_joint" type="fixed">
+        <parent link="${parent_link}"/>
+        <child link="${name}_frame"/>
+        <origin xyz="${x} ${y} ${z}" rpy="${roll} ${pitch} ${yaw}"/>
+      </joint>
+
+      <link name="${name}_frame">
+        <visual>
+          <origin rpy="0 0 0 " xyz="0 0 0.01"/>
+          <geometry>
+            <cylinder radius="0.02" length="0.02"/>
+          </geometry>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0 " xyz="0 0 0.01"/>
+          <geometry>
+            <cylinder radius="0.02" length="0.02"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 0 0 " xyz="0 0 0.01"/>
+          <geometry>
+            <cylinder radius="0.02" length="0.02"/>
+          </geometry>
+          <mass value="0.5"/>
+          <xacro:cylinder_inertia m="0.5" r="0.02" h="0.02"/>
+        </inertial>
+      </link>
+
+      <gazebo>
+          <link name='${name}_light_source'>
+            <pose>${x} ${y} ${z+z_offset} ${roll} ${pitch} ${yaw}</pose>
+            <inertial>
+              <mass>0.0025</mass>
+              <inertia>
+                <ixx>1.0e-05</ixx>
+                <ixy>0</ixy>
+                <ixz>0</ixz>
+                <iyy>1.0e-05</iyy>
+                <iyz>0</iyz>
+                <izz>1.0e-05</izz>
+              </inertia>
+            </inertial>
+            <light name='${name}_lamp' type='spot'>
+              <pose>0 0 -0.005 0 0 0</pose>
+              <attenuation>
+                <range>2.0</range>
+                <linear>0</linear>
+                <constant>0.1</constant>
+                <quadratic>0.01</quadratic>
+              </attenuation>
+              <diffuse>0.9 0.1 0.1 1</diffuse>
+              <specular>0.9 0.1 0.1 1</specular>
+              <spot>
+                <inner_angle>0.2</inner_angle>
+                <outer_angle>0.5</outer_angle>
+                <falloff>1</falloff>
+              </spot>
+              <direction>0 0 -1</direction>
+            </light>
+            <visual name='${name}_lamp'>
+              <geometry>
+                <cylinder>
+                  <radius>0.019</radius>
+                  <length>0.005</length>
+                </cylinder>
+              </geometry>
+              <transparency>0.0</transparency>
+              <material>
+                <ambient>1 1 1 1</ambient>
+                <diffuse>1 1 1 1</diffuse>
+                <specular>1 1 1 1</specular>
+                <emissive>0.9 0.1 0.1 1</emissive>
+              </material>
+            </visual>
+          </link>
+          <plugin name='${name}_control' filename='libnowtech_gazebo_ros_light.so'>
+              <enable>true</enable>
+              <light>
+                <id>${name}_light_source/${name}_lamp</id>
+              </light>
+              <rosDebugLevel>Debug</rosDebugLevel>
+              <command_topic>${topic}</command_topic>
+          </plugin>
+      </gazebo>
+      <gazebo>
+        <joint name='${name}_lightsource_joint' type='fixed'>
+          <parent>${name}_frame</parent>
+          <child>${name}_light_source</child>
+        </joint>
+      </gazebo>
+    </xacro:macro>
+
+</robot>

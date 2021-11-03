@@ -1,0 +1,8 @@
+parent_link: seat_base
+position_x: -0.015
+position_z: 0.265
+arm_rest_distance: 0.45
+arm_rest_height: 0.045
+arm_rest_length: 0.375
+arm_rest_width: 0.078
+arm_rest_mass: 1.2

@@ -1,0 +1,274 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- external macros -->
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/inertia_calc.xacro"/>
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/rubber_wheel.xacro"/>
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/odometry.xacro"/>
+  <xacro:include filename="$(find nowtech_actuator_models)/xacro/motor.xacro"/>
+  <xacro:include filename="$(find nowtech_actuator_models)/xacro/actuator.xacro"/>
+
+  <!-- global base_props -->
+  <xacro:property name="interface"             value="${base_props['interface']}"/>
+  <xacro:property name="track_width"           value="${base_props['track_width']}"/>
+  <xacro:property name="wheelbase_distance"    value="${base_props['wheelbase_distance']}"/>
+  <xacro:property name="steered_wheels_radius" value="${base_props['steered_wheels_radius']}"/>
+  <xacro:property name="steered_wheels_width"  value="${base_props['steered_wheels_width']}"/>
+  <xacro:property name="steered_wheels_mass"   value="${base_props['steered_wheels_mass']}"/>
+  <xacro:property name="steer_angle_min"       value="${base_props['steer_angle_min']}"/>
+  <xacro:property name="steer_angle_max"       value="${base_props['steer_angle_max']}"/>
+  <xacro:property name="drive_wheels_radius"   value="${base_props['drive_wheels_radius']}"/>
+  <xacro:property name="drive_wheels_width"    value="${base_props['drive_wheels_width']}"/>
+  <xacro:property name="drive_wheels_mass"     value="${base_props['drive_wheels_mass']}"/>
+  <xacro:property name="base_mass"             value="${base_props['base_mass']}"/>
+  <xacro:property name="base_length"           value="${base_props['base_length']}"/>
+  <xacro:property name="base_width"            value="${base_props['base_width']}"/>
+  <xacro:property name="base_height"           value="${base_props['base_height']}"/>
+
+  <xacro:property name="servo_update_freq"     value="${base_props['servo_update_freq']}"/>
+  <xacro:property name="servo_velocity"        value="${base_props['servo_velocity']}"/>
+  <xacro:property name="servo_accuracy"        value="${base_props['servo_accuracy']}"/>
+  <xacro:property name="servo_fmax"            value="${base_props['servo_fmax']}"/>
+  <xacro:property name="servo_fudge"           value="${base_props['servo_fudge']}"/>
+
+  <xacro:property name="ground_odometry_enabled" value="${base_props['ground_odometry_enabled']}"/>
+
+  <!-- one point virtual contact with the ground -->
+  <link name="base_footprint"> </link>
+
+  <!-- STEERED WHEELS -->
+
+  <xacro:macro name="steered_wheel" params="name *origin">
+    <xacro:rubber_wheel name="${name}_steered_wheel"
+      wheel_radius="${steered_wheels_radius}"
+      wheel_width="${steered_wheels_width}"
+      wheel_mass="${steered_wheels_mass}"
+    ></xacro:rubber_wheel>
+    <joint name="${name}_susp_axle_joint" type="continuous">
+        <parent link="${name}_suspension"/>
+        <child link="${name}_steered_wheel"/>
+        <origin rpy="${pi/2} 0 0" xyz="0 0 ${-base_height*2}"/>
+        <dynamics damping="0.0" friction="0.0"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+    <link name="${name}_suspension">
+      <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+              <box size="0.01 0.01 0.01"/>
+          </geometry>
+      </visual>
+      <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <box size="0.001 0.001 0.001"/>
+          </geometry>
+      </collision>
+      <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <box size="0.001 0.001 0.001"/>
+          </geometry>
+          <mass value="0.2"/>
+          <xacro:box_inertia m="0.2" x="0.001" y="0.001" z="0.001" />
+      </inertial>
+    </link>
+    <gazebo reference="${name}_suspension">
+        <gravity>true</gravity>
+        <selfCollide>true</selfCollide>
+        <mu1 value="200.0"/>
+        <mu2 value="100.0"/>
+        <kp value="10000000.0"/>
+        <kd value="1.0"/>
+    </gazebo>
+    <joint name="${name}_steering_joint" type="revolute">
+        <parent link="base_link"/>
+        <child link="${name}_suspension"/>
+        <xacro:insert_block name="origin"/>
+        <limit effort="0" velocity="0" lower="${steer_angle_min}" upper="${steer_angle_max}"/>
+        <axis xyz="0 0 1"/>
+    </joint>
+
+    <gazebo>
+      <plugin name="${name}_servo" filename="libnowtech_gazebo_ros_simple_servo.so">
+         <update_rate>${servo_update_freq}</update_rate>
+         <actuated_joint>${name}_steering_joint</actuated_joint>
+         <servo_name>${name}_servo</servo_name>
+         <command_topic>/base/wheel_angle/${name}</command_topic>
+         <actuator_velocity>${servo_velocity}</actuator_velocity>
+         <actuator_accuracy>${servo_accuracy}</actuator_accuracy>
+         <actuator_fmax>${servo_fmax}</actuator_fmax>
+         <actuator_fudge>${servo_fudge}</actuator_fudge>
+       </plugin>
+    </gazebo>
+  </xacro:macro>
+
+
+  <!-- DRIVEN WHEELS -->
+
+  <xacro:macro name="joined_axle_drive" params="motor_params rfd">
+      <!-- type of motor simulation -->
+      <xacro:property name="motor_props" value="${load_yaml(motor_params)}"/>
+      <xacro:property name="simulate_dc_motor" value="${motor_props['motor_type']=='dc_motor'}"/>
+
+      <link name="drive_axle">
+        <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <cylinder length="${track_width}" radius="${drive_wheels_radius/20}"/>
+            </geometry>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <cylinder length="${track_width}" radius="${drive_wheels_radius/20}"/>
+            </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <cylinder length="${track_width}" radius="${drive_wheels_radius/20}"/>
+          </geometry>
+            <mass value="${drive_wheels_mass}"/> <!-- TODO: add separate params -->
+            <xacro:cylinder_inertia m="${drive_wheels_mass}" r="${drive_wheels_radius/20}" h="${track_width}" />
+        </inertial>
+      </link>
+      <xacro:rubber_wheel name="left_drive_wheel"
+        wheel_radius="${drive_wheels_radius}"
+        wheel_width="${drive_wheels_width}"
+        wheel_mass="${drive_wheels_mass}"
+      ></xacro:rubber_wheel>
+      <joint name="left_drive_wheel_joint" type="fixed">
+          <parent link="drive_axle"/>
+          <child link="left_drive_wheel"/>
+          <origin rpy="0 0 0" xyz="0 0 ${track_width/2}"/>
+      </joint>
+      <xacro:rubber_wheel name="right_drive_wheel"
+        wheel_radius="${drive_wheels_radius}"
+        wheel_width="${drive_wheels_width}"
+        wheel_mass="${drive_wheels_mass}"
+      ></xacro:rubber_wheel>
+      <joint name="right_drive_wheel_joint" type="fixed">
+          <parent link="drive_axle"/>
+          <child link="right_drive_wheel"/>
+          <origin rpy="0 0 0" xyz="0 0 ${-track_width/2}"/>
+      </joint>
+
+      <xacro:if value="${simulate_dc_motor}">
+        <xacro:dc_motor motor_name="motor" parent_link="base_link" child_link="drive_axle">
+          <xacro:property name="params_yaml" value="${motor_params}"/>
+          <origin rpy="${pi/2} 0 0" xyz="${rfd*wheelbase_distance/2} 0 ${-base_height/2}"/>
+        </xacro:dc_motor>
+      </xacro:if>
+      <xacro:unless value="${simulate_dc_motor}">
+        <xacro:joint_motor motor_name="wheel" parent_link="base_link" child_link="drive_axle">
+          <xacro:property name="params_yaml" value="${motor_params}"/>
+          <origin rpy="${pi/2} 0 0" xyz="${rfd*wheelbase_distance/2} 0 ${-base_height/2}"/>
+        </xacro:joint_motor>
+      </xacro:unless>
+  </xacro:macro>
+
+  <!-- separate driven wheel -->
+  <xacro:macro name="driven_wheel" params="name *origin motor_params">
+    <xacro:property name="motor_props" value="${load_yaml(motor_params)}"/>
+    <xacro:property name="simulate_dc_motor" value="${motor_props['motor_type']=='dc_motor'}"/>
+
+    <xacro:rubber_wheel name="${name}_drive_wheel"
+      wheel_radius="${drive_wheels_radius}"
+      wheel_width="${drive_wheels_width}"
+      wheel_mass="${drive_wheels_mass}"
+    ></xacro:rubber_wheel>
+
+    <xacro:if value="${simulate_dc_motor}">
+      <xacro:dc_motor motor_name="${name}_motor" parent_link="base_link" child_link="${name}_drive_wheel">
+          <xacro:property name="params_yaml" value="${motor_params}"/>
+        <xacro:insert_block name="origin"/>
+      </xacro:dc_motor>
+    </xacro:if>
+    <xacro:unless value="${simulate_dc_motor}">
+      <xacro:joint_motor motor_name="${name}_wheel" parent_link="base_link" child_link="${name}_drive_wheel">
+          <xacro:property name="params_yaml" value="${motor_params}"/>
+        <xacro:insert_block name="origin"/>
+      </xacro:joint_motor>
+    </xacro:unless>
+  </xacro:macro>
+
+  <!-- BASE -->
+
+  <xacro:macro name="ackermann_base" params="rear_drive motor_params">
+
+    <!-- TODO: fix motor axis rotations -->
+    <xacro:if value="${rear_drive}">
+      <xacro:property name="rfd" value="-1"/>
+    </xacro:if>
+    <xacro:unless value="${rear_drive}">
+      <xacro:property name="rfd" value="-1"/>
+    </xacro:unless>
+
+    <!-- base -->
+    <link name="base_link">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size=" ${base_length} ${base_width} ${base_height} "/>
+            </geometry>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+              <box size=" ${base_length} ${base_width} ${base_height} "/>
+            </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <box size=" ${base_length} ${base_width} ${base_height} "/>
+          </geometry>
+            <mass value="${base_mass}"/>
+            <xacro:box_inertia m="${base_mass}" x="${base_length}" y="${base_width}" z="${base_height}" />
+        </inertial>
+    </link>
+    <joint name="base_footprint_joint" type="fixed">
+      <origin rpy="0 0 ${rear_drive*pi}" xyz="0 0 ${steered_wheels_radius}"/> <!-- TODO: trig. for asymmetric radii -->
+      <parent link="base_footprint"/>
+      <child link="base_link"/>
+    </joint>
+
+    <!-- driven wheels -->
+    <xacro:if value="${interface == 'mode3' or interface == 'mode2'}">
+      <xacro:joined_axle_drive motor_params="${motor_params}" rfd="${-rfd}"></xacro:joined_axle_drive>
+    </xacro:if>
+    <xacro:if value="${interface == 'mode4'}">
+      <xacro:driven_wheel name="left" motor_params="${motor_params}">
+        <origin rpy="${pi/2} 0 0" xyz="${-rfd*wheelbase_distance/2} ${-track_width/2} ${-base_height/2}"/>
+      </xacro:driven_wheel>
+      <xacro:driven_wheel name="right" motor_params="${motor_params}">
+        <origin rpy="${pi/2} 0 0" xyz="${-rfd*wheelbase_distance/2} ${track_width/2} ${-base_height/2}"/>
+      </xacro:driven_wheel>
+    </xacro:if>
+
+    <!-- steered wheels -->
+    <xacro:steered_wheel name="left">
+      <origin rpy="0 0 0" xyz="${rfd*wheelbase_distance/2} ${-track_width/2} ${1.5*base_height}"/>
+    </xacro:steered_wheel>
+    <xacro:steered_wheel name="right">
+      <origin rpy="0 0 0" xyz="${rfd*wheelbase_distance/2} ${track_width/2} ${1.5*base_height}"/>
+    </xacro:steered_wheel>
+
+    <xacro:ground_odometry enabled="${ground_odometry_enabled}"></xacro:ground_odometry>
+  </xacro:macro>
+
+  <!-- drive mode and interface selection -->
+  <xacro:macro name="base" params="method:=^|'rear' motor_yaml">
+    <xacro:if value="${method == 'rear'}">
+      <xacro:ackermann_base rear_drive="true" motor_params="${motor_yaml}"></xacro:ackermann_base>
+    </xacro:if>
+    <xacro:if value="${method == 'front'}">
+      <xacro:ackermann_base rear_drive="false" motor_params="${motor_yaml}"></xacro:ackermann_base>
+    </xacro:if>
+    <xacro:if value="${method != 'rear' and method != 'front'}">
+      <xacro:ackermann_base rear_drive="true" motor_params="${motor_yaml}"></xacro:ackermann_base>
+    </xacro:if>
+  </xacro:macro>
+
+</robot>

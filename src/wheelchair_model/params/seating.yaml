@@ -1,0 +1,37 @@
+enabled            :  true
+parent_link        :  base_link
+position_x         :  0.0 # 0.1
+position_y         :  0.0 # ok
+position_z         :  0.365 # !!!
+#
+seat_lift          :  false
+lift_max           :  0.3 # ok
+#
+seat_tilt          :  false
+tilt_min           : -0.5
+tilt_max           :  0.5
+#
+backrest_tilt      :  false
+recline_min        : -1.0
+recline_max        :  1.0
+# seat base block dimensions : 0.47 0.51 0.095
+base_width         :  0.47 # ok
+base_length        :  0.51 # ok
+base_height        :  0.005 # plate
+base_mass          :  11.2
+#
+cushion_width      :  0.47 # ok
+cushion_length     :  0.51 # ok
+cushion_height     :  0.09 # adds up to 0.095
+cushion_mass       :  1.2 # ok
+# backrest block dimensions: 0.445 0.49 0.115
+backrest_x_offset  :  0.05
+backrest_width     :  0.445
+backrest_height    :  0.49
+backrest_depth     :  0.005 # plate
+backrest_mass      :  6.0
+#
+back_cushion_width :  0.445
+back_cushion_height:  0.49
+back_cushion_depth :  0.11 # adds up to 0.115
+back_cushion_mass  :  2.0

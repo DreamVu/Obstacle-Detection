@@ -1,0 +1,18 @@
+wheelchair:
+
+  joint_trajectory_controller:
+    type: effort_controllers/JointTrajectoryController
+
+    joints:
+      - seat_lift_joint
+      - seat_tilt_joint
+      - seat_backrest_fulcrum_joint
+      - legrest_angle_joint
+      - legrest_inlet_joint
+
+    gains:
+      seat_lift_joint: {p: 200, d: 1, i: 30, i_clamp: 100}
+      seat_tilt_joint: {p: 200, d: 1, i: 30, i_clamp: 100}
+      seat_backrest_fulcrum_joint: {p: 200, d: 1, i: 30, i_clamp: 100}
+      legrest_angle_joint: {p: 200, d: 1, i: 30, i_clamp: 100}
+      legrest_inlet_joint: {p: 200, d: 1, i: 30, i_clamp: 100}

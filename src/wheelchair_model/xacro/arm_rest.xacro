@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/inertia_calc.xacro"/>
+
+    <xacro:macro name="arm_rest" params="parent_link name *origin param_file">
+      <xacro:property name="yaml" value="${param_file}"/>
+      <xacro:property name="arm_rest_params" value="${load_yaml(yaml)}"/>
+
+      <xacro:property name="arm_rest_length" value="${arm_rest_params['arm_rest_length']}"/>
+      <xacro:property name="arm_rest_width"  value="${arm_rest_params['arm_rest_width']}"/>
+      <xacro:property name="arm_rest_height" value="${arm_rest_params['arm_rest_height']}"/>
+      <xacro:property name="arm_rest_mass"   value="${arm_rest_params['arm_rest_mass']}"/>
+
+      <link name="${name}_link">
+        <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+              <box size="${arm_rest_length} ${arm_rest_width} ${arm_rest_height}"/>
+          </geometry>
+          <material name="rubber"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+              <box size="${arm_rest_length} ${arm_rest_width} ${arm_rest_height}"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+              <box size="${arm_rest_length} ${arm_rest_width} ${arm_rest_height}"/>
+          </geometry>
+          <mass value="${arm_rest_mass}"/>
+          <xacro:box_inertia m="${arm_rest_mass}" x="${arm_rest_length}" y="${arm_rest_width}" z="${arm_rest_height}" />
+        </inertial>
+      </link>
+
+      <joint name="${name}_joint" type="fixed">
+        <parent link="${parent_link}"/>
+        <child link="${name}_link"/>
+        <xacro:insert_block name="origin"/>
+      </joint>
+
+    </xacro:macro>
+</robot>

@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<robot name="motor" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find nowtech_actuator_models)/xacro/inertia_calc.xacro"/>
+  <xacro:include filename="$(find nowtech_actuator_models)/xacro/actuator.xacro"/>
+  <xacro:include filename="$(find nowtech_actuator_models)/xacro/motor.xacro"/>
+  <xacro:include filename="$(find nowtech_actuator_models)/xacro/light.xacro"/>
+  <xacro:include filename="$(find nowtech_actuator_models)/xacro/screen.xacro"/>
+
+  <link name="base_footprint"/>
+
+  <joint name="base_joint" type="fixed">
+      <parent link="base_footprint"/>
+      <child link="base_link"/>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+  </joint>
+
+  <link name="base_link">
+      <visual>
+        <geometry>
+          <box size="0.5 0.5 0.005"/>
+        </geometry>
+      </visual>
+      <collision>
+        <geometry>
+          <box size="0.5 0.5 0.005"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <geometry>
+          <box size="0.5 0.5 0.005"/>
+        </geometry>
+        <mass value="500"/>
+        <xacro:box_inertia m="500" x="0.1" y="0.1" z="0.05"/>
+      </inertial>
+  </link>
+
+  <link name="one_link">
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.02"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.05 0.05 0.02"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <geometry>
+        <box size="0.05 0.05 0.02"/>
+      </geometry>
+      <mass value="1"/>
+      <xacro:box_inertia m="1" x="0.05" y="0.05" z="0.02"/>
+    </inertial>
+  </link>
+
+  <xacro:dc_motor motor_name="one_motor" parent_link="base_link" child_link="one_link">
+    <xacro:property name="params_yaml" value="$(find nowtech_actuator_models)/params/dc_motor.yaml"/>
+    <origin xyz="0 -0.2 0.3" rpy="0 0 0"/>
+  </xacro:dc_motor>
+
+  <link name="another_link">
+    <visual>
+      <geometry>
+        <box size="0.05 0.05 0.02"/>
+      </geometry>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.05 0.05 0.02"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <geometry>
+        <box size="0.05 0.05 0.02"/>
+      </geometry>
+      <mass value="1"/>
+      <xacro:box_inertia m="1" x="0.05" y="0.05" z="0.02"/>
+    </inertial>
+  </link>
+
+  <xacro:dc_motor motor_name="another_motor" parent_link="base_link" child_link="another_link">
+    <xacro:property name="params_yaml" value="$(find nowtech_actuator_models)/params/dc_motor.yaml"/>
+    <origin xyz="0 0.2 0.3" rpy="0 0 0"/>
+  </xacro:dc_motor>
+
+
+</robot>

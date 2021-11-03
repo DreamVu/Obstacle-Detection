@@ -1,0 +1,14 @@
+base_type: skid
+drive_method: 4WD
+drive_wheel_radius: 0.14
+drive_wheel_width: 0.07
+drive_wheel_mass: 3.5
+drive_track_distance: 0.54 # distance of drive wheel ground contact points
+wheelbase_offset: 0.0 # offset on X axis from base origin
+wheelbase_distance: 0.5 # distance of the motor axis and the caster hub joint on the x axis
+base_mass: 60.0
+base_length: 0.4
+base_width: 0.35
+base_height: 0.1
+# simulation params
+ground_odometry_enabled: true

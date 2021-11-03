@@ -1,0 +1,15 @@
+base_params     :  /model/diff_base.yaml
+joint_motor_params :  /model/joint_motor.yaml
+dc_motor_params :  /model/dc_motor.yaml
+actuator_enabled:  true
+actuator_params :  /model/actuator.yaml
+legrest_enabled :  true
+legrest_params  :  /model/leg_rest.yaml
+seating_enabled :  true
+seating_params  :  /model/seating.yaml
+lighting_enabled:  false
+lighting_params :  /model/lights.yaml
+armrest_enabled :  true
+armrest_params  :  /model/arm_rest.yaml
+headrest_enabled:  true
+headrest_params :  /model/head_rest.yaml

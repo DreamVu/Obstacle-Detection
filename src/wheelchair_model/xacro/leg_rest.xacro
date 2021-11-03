@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/inertia_calc.xacro"/>
+
+  <xacro:macro name="leg_rest" params="parent_link name *origin param_file actuator_params">
+    <xacro:property name="yaml" value="${param_file}"/>
+    <xacro:property name="leg_rest_params" value="${load_yaml(yaml)}"/>
+
+    <xacro:property name="rod_width"          value="${leg_rest_params['rod_width']}"/>
+    <xacro:property name="rod_height"         value="${leg_rest_params['rod_height']}"/>
+    <xacro:property name="rod_length"         value="${leg_rest_params['rod_length']}"/>
+    <xacro:property name="rod_mass"           value="${leg_rest_params['rod_mass']}"/>
+    <xacro:property name="plate_width"        value="${leg_rest_params['plate_width']}"/>
+    <xacro:property name="plate_depth"        value="${leg_rest_params['plate_depth']}"/>
+    <xacro:property name="plate_height"       value="${leg_rest_params['plate_height']}"/>
+    <xacro:property name="plate_mass"         value="${leg_rest_params['plate_mass']}"/>
+    <xacro:property name="servo_update_freq"  value="${leg_rest_params['servo_update_freq']}"/>
+    <xacro:property name="motion_filter"      value="${leg_rest_params['motion_filter']}"/>
+    <xacro:property name="angle_adjustable"   value="${leg_rest_params['angle_adjustable']}"/>
+    <xacro:property name="min_angle"          value="${leg_rest_params['min_angle']}"/>
+    <xacro:property name="max_angle"          value="${leg_rest_params['max_angle']}"/>
+    <xacro:property name="length_adjustable"  value="${leg_rest_params['length_adjustable']}"/>
+    <xacro:property name="max_length"         value="${leg_rest_params['max_length']}"/>
+
+    <xacro:include filename="$(find nowtech_wheelchair_model)/xacro/xactuator.xacro"/>
+
+    <xacro:xactuator
+      actuator_params="${actuator_params}"
+      joint_name="${name}_angle_joint"
+      actuated="${angle_adjustable}"
+      parent_link="${parent_link}"
+      child_link="${name}_rod_shell_link"
+      type="revolute"
+      lower="${min_angle}"
+      upper="${max_angle}">
+      <axis xyz="0 1 0"/>
+      <xacro:insert_block name="origin"/>
+    </xacro:xactuator>
+
+    <!-- fixed length rod -->
+    <link name="${name}_rod_shell_link">
+      <visual>
+        <origin rpy="0 0 0" xyz="${rod_length/2} 0 0"/>
+        <geometry>
+            <box size=" ${rod_length} ${rod_width} ${rod_height} "/>
+        </geometry>
+        <material name="iron"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="${rod_length/2} 0 0"/>
+        <geometry>
+            <box size=" ${rod_length} ${rod_width} ${rod_height} "/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin rpy="0 0 0" xyz="${rod_length/2} 0 0"/>
+        <geometry>
+            <box size=" ${rod_length} ${rod_width} ${rod_height} "/>
+        </geometry>
+        <mass value="${rod_mass/2}"/>
+        <xacro:box_inertia m="${rod_mass/2}" x="${rod_length}" y="${rod_width}" z="${rod_height}" />
+      </inertial>
+    </link>
+
+    <!-- actuated or fixed joint for rod inlet -->
+    <xacro:xactuator
+      actuator_params="${actuator_params}"
+      joint_name="${name}_inlet_joint"
+      actuated="${length_adjustable}"
+      parent_link="${name}_rod_shell_link"
+      child_link="${name}_rod_inlet_link"
+      type="prismatic"
+      lower="0"
+      upper="${max_length}">
+      <axis xyz="1 0 0"/>
+      <origin rpy="0 0 0" xyz="${rod_length/2} 0 0"/>
+    </xacro:xactuator>
+
+    <!-- 10% smaller inlet -->
+    <link name="${name}_rod_inlet_link">
+      <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+              <box size=" ${rod_length-rod_length/10} ${rod_width-rod_width/10} ${rod_height-rod_height/10} "/>
+          </geometry>
+      </visual>
+      <!-- collision is left out intentionally -->
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+          <box size=" ${rod_length-rod_length/10} ${rod_width-rod_width/10} ${rod_height-rod_height/10} "/>
+        </geometry>
+        <mass value="${rod_mass/2}"/>
+        <xacro:box_inertia m="${rod_mass/2}" x="${rod_length-rod_length/10}" y="${rod_width-rod_width/10}" z="${rod_height-rod_height/10}" />
+      </inertial>
+    </link>
+
+    <!-- fixed plate joint -->
+    <joint name="${name}_plate_joint" type="fixed">
+      <parent link="${name}_rod_inlet_link"/>
+      <child link="${name}_plate_link"/>
+      <origin rpy="0 ${-pi/2} 0" xyz="${rod_length/2} 0 ${plate_depth/2}"/>
+    </joint>
+
+    <!-- leg rest plate -->
+    <link name="${name}_plate_link">
+      <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+              <box size=" ${plate_depth} ${plate_width} ${plate_height} "/>
+          </geometry>
+          <material name="iron"/>
+      </visual>
+      <collision>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+            <box size=" ${plate_depth} ${plate_width} ${plate_height} "/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin rpy="0 0 0" xyz="0 0 0"/>
+        <geometry>
+            <box size=" ${plate_depth} ${plate_width} ${plate_height} "/>
+        </geometry>
+        <mass value="${plate_mass}"/>
+        <xacro:box_inertia m="${plate_mass}" x="${plate_depth}" y="${plate_width}" z="${plate_height}" />
+      </inertial>
+    </link>
+
+  </xacro:macro>
+
+</robot>
