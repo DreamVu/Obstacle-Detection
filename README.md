@@ -31,4 +31,7 @@ Confirm the following dependencies. These are must have to proceed further
 The data files are delivered along with the purchase of the PAL-Mini camera. In case you have not received them, please contact support@dreamvu.com
 
       chmod +x setup.sh
-      sudo ./setup.sh
+
+
+
+If you need help or more informations check our [Help Center](https://support.dreamvu.com/portal/en/home) or join our [Community](https://support.dreamvu.com/portal/en/community/dreamvu-inc).
