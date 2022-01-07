@@ -1,5 +1,5 @@
 # ODOA
-Obstacle Detection &amp; Obstacle Avoidance solution
+Obstacle Detection &amp; Obstacle Avoidance solution with DreamVu [PAL-Mini](https://dreamvu.com/pal-mini/)
 
 Please follow the instructions given below on any of the Nvidia Jetson embedded boards with Jetpack 4.4.1 to install the software.
 
