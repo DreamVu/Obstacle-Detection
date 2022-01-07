@@ -27,6 +27,8 @@ Confirm the following dependencies. These are must have to proceed further
             For Jetson Xavier AGX arg2: 8000
             For Jetson Nano arg2: 1000
             
+Once complete please reboot the system.
+
 ## Step 3. Installing Camera Data File 
 The data files are delivered along with the purchase of the PAL-Mini camera. In case you have not received them, please contact support@dreamvu.com
 
