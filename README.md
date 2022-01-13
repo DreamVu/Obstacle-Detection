@@ -30,7 +30,7 @@ Confirm the following dependencies. These are must have to proceed further
 Once complete please reboot the system.
 
 ## Step 3. Installing Camera Data File 
-The data files are delivered along with the purchase of the PAL-Mini camera. In case you have not received them, please contact support@dreamvu.com
+The data files are delivered along with the purchase of the PAL-Mini camera. In case you have not received them, please request for the files by filling out a [form](https://support.dreamvu.com/portal/en/newticket)
 
       chmod +x setup.sh
       sudo ./setup.sh
