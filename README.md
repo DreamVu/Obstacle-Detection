@@ -3,12 +3,16 @@ Obstacle Detection &amp; Obstacle Avoidance solution with DreamVu [PAL-Mini](htt
 
 Please follow the instructions given below on any of the Nvidia Jetson embedded boards with Jetpack 4.4.1 to install the software.
 
+## Step 1. Clone the repository 
+-     sudo apt-get install git-lfs
+      git clone https://github.com/DreamVu/PAL-USB.git
+      cd PAL-USB
+      git lfs pull
+      
 ## Step 1. Installing Dependencies 
 Confirm the following dependencies. These are must have to proceed further
 
 - ### Jetpack 4.4.1
-- ### Install Git-lfs before cloning this repo. 
--     sudo apt-get install git-lfs
 
 - ### CUDA enabled OpenCV 4.4.0 and OpenCV Contrib 4.4.0 libraries. 
   Follow these steps to install the required OpenCV dependencies. 
