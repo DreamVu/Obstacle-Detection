@@ -5,11 +5,11 @@ Please follow the instructions given below on any of the Nvidia Jetson embedded 
 
 ## Step 1. Clone the repository 
 -     sudo apt-get install git-lfs
-      git clone https://github.com/DreamVu/PAL-USB.git
-      cd PAL-USB
+      git clone https://github.com/DreamVu/Obstacle-Detection.git
+      cd Obstacle-Detection
       git lfs pull
       
-## Step 1. Installing Dependencies 
+## Step 2. Installing Dependencies 
 Confirm the following dependencies. These are must have to proceed further
 
 - ### Jetpack 4.4.1
@@ -22,7 +22,7 @@ Confirm the following dependencies. These are must have to proceed further
 
 - ### Python 3.6 libraries (pytorch, torchvision, numpy, PIL, etc.)
 
-## Step 2. Installing ODOA 
+## Step 3. Installing ODOA 
       cd installations
       chmod +x ./*.sh
       sudo ./install.sh arg1 arg2
@@ -36,7 +36,7 @@ Confirm the following dependencies. These are must have to proceed further
             
 Once complete please reboot the system.
 
-## Step 3. Installing Camera Data File 
+## Step 4. Installing Camera Data File 
 The data files are delivered along with the purchase of the PAL-Mini camera. In case you have not received them, please request for the files by filling out a [form](https://support.dreamvu.com/portal/en/newticket)
 
       chmod +x setup.sh
